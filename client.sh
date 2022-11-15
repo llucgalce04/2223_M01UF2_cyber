@@ -1,20 +1,81 @@
 #!/bin/bash
-echo "Cliente HMPT"
 
-echo "(1)SEND - Enviando el Hansake"
+IP_SERVER="localhost"
+IP_LOCAL="127.0.0.1"
 
-echo "GREEN_POWA 127.0.0.1" | nc localhost 4242
+PORT="4242"
 
-echo "(2)LISTEN - Escuchando confirmacion"
+echo "Cliente HMTP"
 
-MSG=`nc -l 4242`
+echo "(1) SEND - Enviando el Handshake"
 
-echo $MSG
+MD5_IP=`echo $IP_LOCAL | md5sum | cut -d " " -f 1`
 
-if [ "$MSG" != "OK_HMPT" ]
-then 
-	echo "ERROR 1: Handshake mal formado"
-	exit
+echo "GREEN_POWA $IP_LOCAL $MD5_IP" | nc $IP_SERVER $PORT
+
+echo "(2) LISTEN - Escuchando confirmación"
+
+MSG=`nc -l $PORT`
+
+if [ "$MSG" != "OK_HMTP" ]
+then
+	echo "ERROR 1: Handshake mal fomado"
+	exit 1
 fi
 
-echo "Seguimos activos"
+echo "(5) SEND - Enviamos el nombre de archivo"
+
+FILE_NAME="elon_musk.jpg"
+
+FILE_MD5=`echo $FILE_NAME | md5sum | cut -d " " -f 1`
+
+echo "FILE_NAME $FILE_NAME $FILE_MD5" | nc $IP_SERVER $PORT
+
+echo "(6) LISTEN - Escuchando confirmación nombre archivo"
+
+MSG=`nc -l $PORT`
+
+if [ "$MSG" != "OK_FILE_NAME" ]
+then
+	echo "ERROR 2: Nombre de archivo enviado incorrectamente"
+	echo "	Mensaje de error: $MSG"
+
+	exit 2
+fi
+
+echo "(9) SEND - Enviamos datos del archivo"
+
+cat memes/$FILE_NAME | nc $IP_SERVER $PORT
+
+echo "(10) LISTEN - Escuchamos confirmación datos archivo"
+
+MSG=`nc -l $PORT`
+
+if [ "$MSG" != "OK_DATA_RCPT" ]
+then
+	echo "ERROR 3: Datos enviados incorrectamente"
+	exit 3
+fi
+
+
+echo "(13) SEND - MD5 de los datos"
+
+DATA_MD5=`cat memes/$FILE_NAME | md5sum | cut -d " " -f 1`
+
+echo "DATA_MD5 $DATA_MD5" | nc $IP_SERVER $PORT
+
+echo "(14) LISTEN - MD5 Comprobación"
+
+MSG=`nc -l $PORT`
+
+if [ "$MSG" != "OK_DATA_MD5" ]
+then
+	echo "ERROR 4: MD5 incorrecto"
+	echo "	Mensaje de error: $MSG"
+	exit 4
+fi
+
+
+echo "Fin del envío"
+
+exit 0
