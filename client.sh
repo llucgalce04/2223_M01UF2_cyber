@@ -1,9 +1,25 @@
 #!/bin/bash
 
+if [ "$1" == "-h" ]
+then
+	SCRIPT=`basename $0`
+	echo "Ejemplo de uso:"
+	echo "  $0 127.0.0.1"
+	exit 0
+fi
+
 IP_SERVER="localhost"
-IP_LOCAL="127.0.0.1"
+IP_LOCAL=`ip address | grep inet | grep enp0s3 | sed "s/^ *//g" | cut -d " " -f 2 | cut -d "/" -f 1`
 
 PORT="4242"
+
+echo "IP local: $IP_LOCAL"
+
+if [ "$1" != "" ]
+then
+	IP_SERVER=$1
+	echo "IP del servidor: $IP_SERVER"
+fi
 
 echo "Cliente HMTP"
 
@@ -13,7 +29,7 @@ MD5_IP=`echo $IP_LOCAL | md5sum | cut -d " " -f 1`
 
 echo "GREEN_POWA $IP_LOCAL $MD5_IP" | nc $IP_SERVER $PORT
 
-echo "(2) LISTEN - Escuchando confirmaci贸n"
+echo "(2) LISTEN - Escuchando confirmaci髇"
 
 MSG=`nc -l $PORT`
 
@@ -31,7 +47,7 @@ FILE_MD5=`echo $FILE_NAME | md5sum | cut -d " " -f 1`
 
 echo "FILE_NAME $FILE_NAME $FILE_MD5" | nc $IP_SERVER $PORT
 
-echo "(6) LISTEN - Escuchando confirmaci贸n nombre archivo"
+echo "(6) LISTEN - Escuchando confirmaci髇 nombre archivo"
 
 MSG=`nc -l $PORT`
 
@@ -47,7 +63,7 @@ echo "(9) SEND - Enviamos datos del archivo"
 
 cat memes/$FILE_NAME | nc $IP_SERVER $PORT
 
-echo "(10) LISTEN - Escuchamos confirmaci贸n datos archivo"
+echo "(10) LISTEN - Escuchamos confirmaci髇 datos archivo"
 
 MSG=`nc -l $PORT`
 
@@ -64,7 +80,7 @@ DATA_MD5=`cat memes/$FILE_NAME | md5sum | cut -d " " -f 1`
 
 echo "DATA_MD5 $DATA_MD5" | nc $IP_SERVER $PORT
 
-echo "(14) LISTEN - MD5 Comprobaci贸n"
+echo "(14) LISTEN - MD5 Comprobaci髇"
 
 MSG=`nc -l $PORT`
 
@@ -76,6 +92,6 @@ then
 fi
 
 
-echo "Fin del env铆o"
+echo "Fin del env韔"
 
 exit 0

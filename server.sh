@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo `ip addres | grep -i inet | grep enp0s3 | sed "s/^ *//g "| cut  -d " " -f 2 | cut -d "/" -f1`
+
 PORT="4242"
 
 echo "Servidor HMTP"
@@ -74,7 +76,7 @@ DATA_MD5=`echo $MSG | cut -d " " -f 2`
 if [ "$PREFIX" != "DATA_MD5" ]
 then
 	echo "KO_MD5_PREFIX" | nc $IP_CLIENT $PORT
-	exit 4
+	it 4
 fi
 
 
